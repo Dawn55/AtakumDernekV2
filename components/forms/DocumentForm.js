@@ -8,15 +8,21 @@ import Input from '@/components/ui/Input'
 
 export default function DocumentForm({ document = null }) {
   const router = useRouter();
-  const fileInputRef = useRef(null); // Dosya input'u için ref
+  const fileInputRef = useRef(null);
   
   const [formData, setFormData] = useState({
     title: document?.title || "",
     description: document?.description || "",
     category: document?.category || "",
     published: document?.published || false,
+    fileUrl: document?.fileUrl || "",
+    filePath: document?.filePath || "",
+    fileBucket: document?.fileBucket || "",
+    fileName: document?.fileName || "",
+    mimeType: document?.mimeType || "", // Add mimeType to state
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isUploading, setIsUploading] = useState(false);
   const [error, setError] = useState("");
 
   const handleChange = (e) => {
@@ -27,41 +33,111 @@ export default function DocumentForm({ document = null }) {
     }));
   };
 
+  const handleFileChange = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    // Dosya boyutu kontrolü (max 10MB)
+    if (file.size > 10 * 1024 * 1024) {
+      setError("Dosya boyutu 10MB'dan küçük olmalıdır.");
+      return;
+    }
+
+    setIsUploading(true);
+    setError("");
+
+    try {
+      const uploadFormData = new FormData();
+      uploadFormData.append('file', file);
+      uploadFormData.append('type', 'documents');
+
+      const response = await fetch('/api/upload', {
+        method: 'POST',
+        body: uploadFormData,
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        
+        // Eski dosyayı sil (eğer varsa ve güncelleme yapılıyorsa)
+        if (formData.filePath && formData.fileBucket) {
+          await deleteOldFile(formData.filePath, formData.fileBucket);
+        }
+        
+        setFormData(prev => ({
+          ...prev,
+          fileUrl: data.url,
+          filePath: data.path,
+          fileBucket: data.bucket,
+          fileName: data.filename,
+          mimeType: file.type || getMimeTypeFromExtension(file.name) // Set mimeType from file or extension
+        }));
+      } else {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Yükleme başarısız');
+      }
+    } catch (error) {
+      console.error('Upload error:', error);
+      setError(`Dosya yükleme hatası: ${error.message}`);
+    } finally {
+      setIsUploading(false);
+    }
+  };
+
+  // Helper function to determine MIME type from file extension
+  const getMimeTypeFromExtension = (filename) => {
+    const extension = filename.split('.').pop().toLowerCase();
+    const mimeTypes = {
+      'pdf': 'application/pdf',
+      'doc': 'application/msword',
+      'docx': 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+      'txt': 'text/plain',
+      'rtf': 'application/rtf',
+      'odt': 'application/vnd.oasis.opendocument.text'
+    };
+    return mimeTypes[extension] || 'application/octet-stream';
+  };
+
+  const deleteOldFile = async (path, bucket) => {
+    try {
+      await fetch(`/api/upload?bucket=${bucket}&path=${encodeURIComponent(path)}`, {
+        method: 'DELETE'
+      });
+    } catch (error) {
+      console.error('Eski dosya silinirken hata:', error);
+    }
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsSubmitting(true);
     setError("");
 
     try {
-      const formDataToSend = new FormData();
-      formDataToSend.append("title", formData.title);
-      formDataToSend.append("description", formData.description);
-      formDataToSend.append("category", formData.category);
-      
-      if (formData.published) {
-        formDataToSend.append("published", "on");
-      }
-
-      // Dosya input'unu ref ile al
-      const selectedFile = fileInputRef.current?.files[0];
-      
       // Yeni doküman oluştururken dosya zorunlu
-      if (!document && !selectedFile) {
-        setError("Lütfen bir dosya seçin.");
+      if (!document && !formData.fileUrl) {
+        setError("Lütfen bir dosya yükleyin.");
         setIsSubmitting(false);
         return;
       }
 
-      // Dosya varsa ekle
-      if (selectedFile) {
-        formDataToSend.append("file", selectedFile);
-      }
+      const dataToSend = {
+        title: formData.title,
+        description: formData.description,
+        category: formData.category,
+        published: formData.published,
+        fileUrl: formData.fileUrl,
+        filePath: formData.filePath,
+        fileBucket: formData.fileBucket,
+        fileName: formData.fileName,
+        mimeType: formData.mimeType // Include mimeType in data to send
+      };
 
       let result;
       if (document) {
-        result = await updateDocument(document.id, formDataToSend);
+        result = await updateDocument(document.id, dataToSend);
       } else {
-        result = await createDocument(formDataToSend);
+        result = await createDocument(dataToSend);
       }
 
       if (result.success) {
@@ -138,12 +214,22 @@ export default function DocumentForm({ document = null }) {
           id="file"
           name="file"
           type="file"
-          ref={fileInputRef} // Ref eklendi
-          required={!document} // Sadece yeni doküman için zorunlu
+          ref={fileInputRef}
+          onChange={handleFileChange}
+          required={!document && !formData.fileUrl}
           accept=".pdf,.doc,.docx,.txt"
+          disabled={isUploading}
           className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
         />
-        {document && (
+        {isUploading && (
+          <p className="mt-2 text-sm text-blue-600">Dosya yükleniyor...</p>
+        )}
+        {formData.fileUrl && (
+          <p className="mt-2 text-sm text-green-600">
+            ✅ Dosya yüklendi: {formData.fileName} ({formData.mimeType})
+          </p>
+        )}
+        {document && !formData.fileUrl && (
           <p className="mt-2 text-sm text-gray-600">
             Mevcut dosya: {document.fileName} ({document.mimeType})
           </p>
@@ -169,11 +255,11 @@ export default function DocumentForm({ document = null }) {
           type="button"
           variant="outline"
           onClick={() => router.push("/admin/documents")}
-          disabled={isSubmitting}
+          disabled={isSubmitting || isUploading}
         >
           İptal
         </Button>
-        <Button type="submit" disabled={isSubmitting}>
+        <Button type="submit" disabled={isSubmitting || isUploading}>
           {isSubmitting ? "Kaydediliyor..." : document ? "Güncelle" : "Oluştur"}
         </Button>
       </div>
