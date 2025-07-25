@@ -21,7 +21,7 @@ export default async function DocumentsPage() {
   }, {});
 
   const formatFileSize = (bytes) => {
-    if (bytes === 0) return "0 Bytes";
+    if (bytes === 0 || !bytes) return "Bilinmeyen boyut";
     const k = 1024;
     const sizes = ["Bytes", "KB", "MB", "GB"];
     const i = Math.floor(Math.log(bytes) / Math.log(k));
@@ -29,17 +29,34 @@ export default async function DocumentsPage() {
   };
 
   const getFileIcon = (mimeType) => {
-    if (mimeType.includes("pdf")) return "📄";
-    if (mimeType.includes("word")) return "📝";
+    if (!mimeType) return "📁";
+    if (mimeType.includes("pdf")) return "📑";
+    if (mimeType.includes("word") || mimeType.includes("msword") || mimeType.includes("wordprocessingml")) return "📝";
     if (mimeType.includes("excel") || mimeType.includes("spreadsheet")) return "📊";
     if (mimeType.includes("image")) return "🖼️";
     if (mimeType.includes("zip") || mimeType.includes("rar")) return "📦";
+    if (mimeType.includes("text")) return "📄";
     return "📁";
+  };
+
+  const getFileFormat = (mimeType) => {
+    if (!mimeType) return "UNKNOWN";
+    if (mimeType.includes("pdf")) return "PDF";
+    if (mimeType.includes("word") || mimeType.includes("msword") || mimeType.includes("wordprocessingml")) return "WORD";
+    if (mimeType.includes("excel") || mimeType.includes("spreadsheet")) return "EXCEL";
+    if (mimeType.includes("image/jpeg") || mimeType.includes("image/jpg")) return "JPG";
+    if (mimeType.includes("image/png")) return "PNG";
+    if (mimeType.includes("image")) return "IMAGE";
+    if (mimeType.includes("zip")) return "ZIP";
+    if (mimeType.includes("rar")) return "RAR";
+    if (mimeType.includes("text")) return "TXT";
+    return "FILE";
   };
 
   return (
     <div className="min-h-screen bg-gray-50">
       <Header />
+      
       <div className="relative bg-gradient-to-r from-green-600 to-blue-600 py-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center">
@@ -75,23 +92,47 @@ export default async function DocumentsPage() {
                           {document.description}
                         </p>
                       )}
-                      <div className="flex items-center justify-between">
+                      <div className="flex items-center justify-between mb-3">
                         <div className="text-sm text-gray-500">
-                          <span className="block">{formatFileSize(document.fileSize)}</span>
+                          <span className="block font-semibold text-gray-700 text-xs uppercase tracking-wide mb-1">
+                            {getFileFormat(document.mimeType)}
+                          </span>
                           <span className="block">
                             {new Date(document.createdAt).toLocaleDateString("tr-TR")}
                           </span>
+                          {document.fileSize && (
+                            <span className="block text-xs mt-1">
+                              {formatFileSize(document.fileSize)}
+                            </span>
+                          )}
                         </div>
+                      </div>
+                      
+                      <div className="flex space-x-2">
+                        {/* Download Button - API kullanarak */}
                         <a
-                          href={document.fileUrl}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 transition-colors"
+                          href={`/api/download/${document.id}`}
+                          download
+                          className="inline-flex items-center px-3 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 transition-colors flex-1 justify-center"
                         >
                           <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                           </svg>
                           İndir
+                        </a>
+                        
+                        {/* View Button */}
+                        <a
+                          href={document.fileUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="inline-flex items-center px-3 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 transition-colors"
+                        >
+                          <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                          </svg>
+                          Görüntüle
                         </a>
                       </div>
                     </div>
