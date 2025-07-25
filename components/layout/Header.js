@@ -66,11 +66,19 @@ export function Header() {
                   </Link>
                 )}
                 <div className="flex items-center space-x-4 bg-gray-50 px-4 py-2 rounded-lg">
-                  <div className="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center">
-                    <span className="text-white font-semibold text-sm">
-                      {session.user.name?.charAt(0).toUpperCase()}
-                    </span>
-                  </div>
+                  {session.user.image ? (
+                    <img 
+                      src={session.user.image} 
+                      alt={session.user.name || 'Kullanıcı'} 
+                      className="w-8 h-8 rounded-full object-cover border-2 border-blue-600"
+                    />
+                  ) : (
+                    <div className="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center">
+                      <span className="text-white font-semibold text-sm">
+                        {session.user.name?.charAt(0).toUpperCase()}
+                      </span>
+                    </div>
+                  )}
                   <span className="text-base font-medium text-gray-700">
                     {session.user.name}
                   </span>

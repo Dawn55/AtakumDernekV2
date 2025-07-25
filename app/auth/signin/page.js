@@ -1,10 +1,9 @@
 import { getServerSession } from "next-auth/next";
-import { authOptions } from "../../../lib/auth";
+import { authOptions } from "@/lib/auth";
 import { redirect } from "next/navigation";
-import { getProviders } from "next-auth/react";
-import Card from "../../../components/ui/Card";
-import Button from "../../../components/ui/Button";
-import LoginForm from "../../../components/auth/LoginForm";
+import Card from "@/components/ui/Card";
+import LoginForm from "@/components/auth/LoginForm";
+import SocialLoginButtons from "@/components/auth/SocialLoginButtons";
 
 export default async function SignInPage() {
   const session = await getServerSession(authOptions);
@@ -12,8 +11,6 @@ export default async function SignInPage() {
   if (session) {
     redirect("/");
   }
-
-  const providers = await getProviders();
 
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
@@ -34,6 +31,19 @@ export default async function SignInPage() {
       <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
         <Card className="p-8">
           <div className="space-y-6">
+            {/* Social Login Buttons */}
+            <SocialLoginButtons />
+
+            {/* Divider */}
+            <div className="relative">
+              <div className="absolute inset-0 flex items-center">
+                <div className="w-full border-t border-gray-300" />
+              </div>
+              <div className="relative flex justify-center text-sm">
+                <span className="px-2 bg-white text-gray-500">veya</span>
+              </div>
+            </div>
+
             {/* Email Login Form */}
             <LoginForm />
 
