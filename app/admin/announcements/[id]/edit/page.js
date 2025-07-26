@@ -23,9 +23,8 @@ export default async function EditAnnouncementPage({ params }) {
         </p>
       </div>
 
-      <Card className="p-6">
+
         <AnnouncementForm announcement={announcement} />
-      </Card>
     </div>
   );
 }
