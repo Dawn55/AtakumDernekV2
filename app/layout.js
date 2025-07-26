@@ -7,6 +7,9 @@ const inter = Inter({ subsets: ['latin'] })
 export const metadata = {
   title: 'Atakum Bilişim Derneği',
   description: 'Bilişim teknolojilerinin geliştirilmesi ve yaygınlaştırılması amacıyla faaliyet gösteren sivil toplum kuruluşu',
+    icons: {
+    icon: '/favicon.ico',
+  }
 }
 export default function RootLayout({ children }) {
 
