@@ -42,12 +42,47 @@ export default async function HomePage() {
         title: true,
         description: true,
         fileUrl: true,
-        createdAt: true
+        createdAt: true,
+        mimeType: true,
+        fileSize: true
       }
     })
   } catch (error) {
     console.error('Error fetching data:', error)
   }
+
+  const getFileIcon = (mimeType) => {
+    if (!mimeType) return "📁";
+    if (mimeType.includes("pdf")) return "📑";
+    if (mimeType.includes("word") || mimeType.includes("msword") || mimeType.includes("wordprocessingml")) return "📝";
+    if (mimeType.includes("excel") || mimeType.includes("spreadsheet")) return "📊";
+    if (mimeType.includes("image")) return "🖼️";
+    if (mimeType.includes("zip") || mimeType.includes("rar")) return "📦";
+    if (mimeType.includes("text")) return "📄";
+    return "📁";
+  };
+
+  const getFileFormat = (mimeType) => {
+    if (!mimeType) return "UNKNOWN";
+    if (mimeType.includes("pdf")) return "PDF";
+    if (mimeType.includes("word") || mimeType.includes("msword") || mimeType.includes("wordprocessingml")) return "WORD";
+    if (mimeType.includes("excel") || mimeType.includes("spreadsheet")) return "EXCEL";
+    if (mimeType.includes("image/jpeg") || mimeType.includes("image/jpg")) return "JPG";
+    if (mimeType.includes("image/png")) return "PNG";
+    if (mimeType.includes("image")) return "IMAGE";
+    if (mimeType.includes("zip")) return "ZIP";
+    if (mimeType.includes("rar")) return "RAR";
+    if (mimeType.includes("text")) return "TXT";
+    return "FILE";
+  };
+
+  const formatFileSize = (bytes) => {
+    if (bytes === 0 || !bytes) return "Bilinmeyen boyut";
+    const k = 1024;
+    const sizes = ["Bytes", "KB", "MB", "GB"];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + " " + sizes[i];
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50">
@@ -249,30 +284,45 @@ export default async function HomePage() {
                   style={{ animationDelay: `${index * 200}ms` }}
                 >
                   <CardBody className="p-6">
-                    <div className="mb-4">
-                      <span className="inline-block px-3 py-1 bg-green-100 text-green-800 text-xs font-semibold rounded-full">
-                        BELGE
-                      </span>
+                    <div className="flex items-start mb-4">
+                      <div className="text-2xl mr-3">
+                        {getFileIcon(document.mimeType)}
+                      </div>
+                      <div className="flex-1">
+                        <span className="inline-block px-3 py-1 bg-green-100 text-green-800 text-xs font-semibold rounded-full mb-2">
+                          BELGE
+                        </span>
+                        <h3 className="text-xl font-bold mb-3 text-gray-900">
+                          {document.title}
+                        </h3>
+                        <div className="text-sm text-gray-500 mb-3">
+                          <span className="block font-semibold text-gray-700 text-xs uppercase tracking-wide mb-1">
+                            {getFileFormat(document.mimeType)}
+                          </span>
+                          <span className="block mb-1">
+                            {formatDate(document.createdAt)}
+                          </span>
+                          {document.fileSize && (
+                            <span className="block text-xs">
+                              {formatFileSize(document.fileSize)}
+                            </span>
+                          )}
+                        </div>
+                        <p className="text-gray-700 mb-6 leading-relaxed">
+                          {document.description || 'Belge açıklaması bulunmamaktadır.'}
+                        </p>
+                        <a 
+                          href={document.fileUrl}
+                          download
+                          className="inline-flex items-center text-blue-600 hover:text-blue-800 font-semibold transition-colors duration-300 group"
+                        >
+                          İndir 
+                          <svg className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
+                          </svg>
+                        </a>
+                      </div>
                     </div>
-                    <h3 className="text-xl font-bold mb-3 text-gray-900">
-                      {document.title}
-                    </h3>
-                    <p className="text-gray-500 text-sm mb-4 font-medium">
-                      {formatDate(document.createdAt)}
-                    </p>
-                    <p className="text-gray-700 mb-6 leading-relaxed">
-                      {document.description || 'Belge açıklaması bulunmamaktadır.'}
-                    </p>
-                    <a 
-                      href={document.fileUrl}
-                      download
-                      className="inline-flex items-center text-blue-600 hover:text-blue-800 font-semibold transition-colors duration-300 group"
-                    >
-                      İndir 
-                      <svg className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
-                      </svg>
-                    </a>
                   </CardBody>
                 </Card>
               ))}
