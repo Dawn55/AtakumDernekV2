@@ -59,7 +59,9 @@ export default function RegisterForm() {
       redirect('/auth/login');
       e.target.reset();
     } catch (err) {
-      setError(err.message);
+      if(!success){
+        setError(err.message);
+      }
     } finally {
       setIsLoading(false);
     }
