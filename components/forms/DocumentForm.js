@@ -93,7 +93,11 @@ export default function DocumentForm({ document = null }) {
       'docx': 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
       'txt': 'text/plain',
       'rtf': 'application/rtf',
-      'odt': 'application/vnd.oasis.opendocument.text'
+      'odt': 'application/vnd.oasis.opendocument.text',
+      'xls': 'application/vnd.ms-excel',
+      'xlsx': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+      'xlsm': 'application/vnd.ms-excel.sheet.macroEnabled.12',
+      'csv': 'text/csv'
     };
     return mimeTypes[extension] || 'application/octet-stream';
   };
@@ -201,7 +205,7 @@ export default function DocumentForm({ document = null }) {
           type="text"
           value={formData.category}
           onChange={handleChange}
-          placeholder="Örn: Tüzük, Yönetmelik, Rapor"
+          placeholder="Örn: Tüzük, Yönetmelik, Rapor, Excel"
           className="w-full"
         />
       </div>
@@ -217,7 +221,7 @@ export default function DocumentForm({ document = null }) {
           ref={fileInputRef}
           onChange={handleFileChange}
           required={!document && !formData.fileUrl}
-          accept=".pdf,.doc,.docx,.txt"
+          accept=".pdf,.doc,.docx,.txt,.xls,.xlsx,.xlsm,.csv"
           disabled={isUploading}
           className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
         />
@@ -234,6 +238,9 @@ export default function DocumentForm({ document = null }) {
             Mevcut dosya: {document.fileName} ({document.mimeType})
           </p>
         )}
+        <p className="mt-1 text-xs text-gray-500">
+          Desteklenen formatlar: PDF, Word (.doc, .docx), Excel (.xls, .xlsx, .xlsm), CSV, TXT (Maksimum 10MB)
+        </p>
       </div>
 
       <div className="flex items-center">
