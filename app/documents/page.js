@@ -2,14 +2,48 @@ import { PrismaClient } from "@prisma/client";
 import Card from "../../components/ui/Card";
 import { Header } from '@/components/layout/Header'
 import { Footer } from '@/components/layout/Footer'
+import SearchComponent from '@/components/ui/SearchBar';
 
 const prisma = new PrismaClient();
 
-export default async function DocumentsPage() {
+
+
+export default async function DocumentsPage({ searchParams }) {
+  const query = searchParams?.q || '';
+  const selectedCategory = searchParams?.category || '';
+
+  // Arama ve filtreleme logic'i
+  const whereClause = {
+    published: true,
+  };
+
+  if (query) {
+    whereClause.OR = [
+      { title: { contains: query, mode: 'insensitive' } },
+      { description: { contains: query, mode: 'insensitive' } }
+    ];
+  }
+
+  if (selectedCategory && selectedCategory !== 'all') {
+    whereClause.category = selectedCategory;
+  }
+
   const documents = await prisma.document.findMany({
-    where: { published: true },
+    where: whereClause,
     orderBy: { createdAt: "desc" }
   });
+
+  // Tüm kategorileri al (search dropdown için)
+  const allCategories = await prisma.document.findMany({
+    where: { published: true },
+    select: { category: true },
+    distinct: ['category']
+  });
+
+  const categories = allCategories
+    .map(doc => doc.category || "Genel")
+    .filter((category, index, self) => self.indexOf(category) === index)
+    .sort();
 
   const groupedDocuments = documents.reduce((acc, doc) => {
     const category = doc.category || "Genel";
@@ -18,7 +52,7 @@ export default async function DocumentsPage() {
     }
     acc[category].push(doc);
     return acc;
-  }, {});
+  }, {} );
 
   const formatFileSize = (bytes) => {
     if (bytes === 0 || !bytes) return "Bilinmeyen boyut";
@@ -71,10 +105,45 @@ export default async function DocumentsPage() {
       </div>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        {/* Arama Bileşeni */}
+        <SearchComponent 
+          categories={categories} 
+          currentQuery={query}
+          currentCategory={selectedCategory}
+        />
+
+        {/* Arama Sonuçları Bilgisi */}
+        {(query || selectedCategory) && (
+          <div className="mb-8 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center space-x-2">
+                <svg className="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                </svg>
+                <span className="text-blue-800 font-medium">
+                  {documents.length} belge bulundu
+                  {query && <span className="font-normal"> - "{query}" için</span>}
+                  {selectedCategory && <span className="font-normal"> - {selectedCategory} kategorisinde</span>}
+                </span>
+              </div>
+              <a 
+                href="/documents" 
+                className="text-blue-600 hover:text-blue-800 text-sm font-medium flex items-center"
+              >
+                <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+                Temizle
+              </a>
+            </div>
+          </div>
+        )}
+
+        {/* Belgeler Listesi */}
         {Object.entries(groupedDocuments).map(([category, docs]) => (
           <div key={category} className="mb-12">
             <h2 className="text-2xl font-bold text-gray-900 mb-6 border-b-2 border-gray-200 pb-2">
-              {category}
+              {category} <span className="text-lg font-normal text-gray-500">({docs.length})</span>
             </h2>
             <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
               {docs.map((document) => (
@@ -143,7 +212,7 @@ export default async function DocumentsPage() {
           </div>
         ))}
 
-        {documents.length === 0 && (
+        {documents.length === 0 && !query && !selectedCategory && (
           <div className="text-center py-16">
             <div className="max-w-md mx-auto">
               <svg className="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -153,6 +222,26 @@ export default async function DocumentsPage() {
               <p className="mt-2 text-gray-500">
                 Yakında belgeler paylaşılacaktır.
               </p>
+            </div>
+          </div>
+        )}
+
+        {documents.length === 0 && (query || selectedCategory) && (
+          <div className="text-center py-16">
+            <div className="max-w-md mx-auto">
+              <svg className="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+              </svg>
+              <h3 className="mt-4 text-lg font-medium text-gray-900">Arama sonucu bulunamadı</h3>
+              <p className="mt-2 text-gray-500">
+                Farklı anahtar kelimeler deneyebilir veya filtreyi değiştirebilirsiniz.
+              </p>
+              <a 
+                href="/documents" 
+                className="mt-4 inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700"
+              >
+                Tüm Belgeleri Görüntüle
+              </a>
             </div>
           </div>
         )}

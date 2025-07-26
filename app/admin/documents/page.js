@@ -2,6 +2,8 @@ import { PrismaClient } from "@prisma/client";
 import Link from "next/link";
 import Card from "../../../components/ui/Card";
 import Button from "../../../components/ui/Button";
+import DeleteButton from "../../../components/ui/DeleteButton";
+import { deleteDocument } from "../../../lib/actions/documents";
 
 const prisma = new PrismaClient();
 
@@ -105,6 +107,11 @@ export default async function AdminDocumentsPage() {
                 >
                   İndir
                 </a>
+                <DeleteButton
+                  itemId={document.id}
+                  itemTitle={document.title}
+                  deleteAction={deleteDocument}
+                />
               </div>
             </div>
           </Card>
