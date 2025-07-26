@@ -2,6 +2,8 @@ import { PrismaClient } from "@prisma/client";
 import Link from "next/link";
 import Card from "../../../components/ui/Card";
 import Button from "../../../components/ui/Button";
+import DeleteButton from "../../../components/ui/DeleteButton";
+import { deleteAnnouncement } from "../../../lib/actions/announcements";
 
 const prisma = new PrismaClient();
 
@@ -47,6 +49,11 @@ export default async function AdminAnnouncementsPage() {
                 <Link href={`/admin/announcements/${announcement.id}/edit`}>
                   <Button variant="outline" size="sm">Düzenle</Button>
                 </Link>
+                <DeleteButton
+                  itemId={announcement.id}
+                  itemTitle={announcement.title}
+                  deleteAction={deleteAnnouncement}
+                />
               </div>
             </div>
           </Card>
