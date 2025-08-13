@@ -100,7 +100,7 @@ export default async function AdminDocumentsPage() {
                   <Button variant="outline" size="sm">Düzenle</Button>
                 </Link>
                 <a
-                  href={document.fileUrl}
+                  href={`/api/download/${document.id}`}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="inline-flex items-center px-3 py-1 border border-transparent text-sm font-medium rounded-md text-blue-600 bg-blue-100 hover:bg-blue-200"

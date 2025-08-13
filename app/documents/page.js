@@ -103,9 +103,9 @@ export default async function DocumentsPage({ searchParams }) {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <Header />
+      <Header currentPage="/documents" />
       
-      <div className="relative bg-gradient-to-r from-green-600 to-blue-600 py-16">
+      <div className="pt-32 relative bg-gradient-to-r from-green-600 to-blue-600 py-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center">
             <h1 className="text-4xl font-bold text-white mb-4">
@@ -192,7 +192,6 @@ export default async function DocumentsPage({ searchParams }) {
                       </div>
                       
                       <div className="flex space-x-2">
-                        {/* Download Button - API kullanarak */}
                         <a
                           href={`/api/download/${document.id}`}
                           download

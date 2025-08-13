@@ -21,6 +21,7 @@ export default function DocumentForm({ document = null }) {
     fileName: document?.fileName || "",
     mimeType: document?.mimeType || "", // Add mimeType to state
   });
+  console.log(formData?.fileBucket + " " + formData?.filePath);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
   const [error, setError] = useState("");
@@ -84,7 +85,7 @@ export default function DocumentForm({ document = null }) {
     }
   };
 
-  // Helper function to determine MIME type from file extension
+  
   const getMimeTypeFromExtension = (filename) => {
     const extension = filename.split('.').pop().toLowerCase();
     const mimeTypes = {
@@ -134,7 +135,7 @@ export default function DocumentForm({ document = null }) {
         filePath: formData.filePath,
         fileBucket: formData.fileBucket,
         fileName: formData.fileName,
-        mimeType: formData.mimeType // Include mimeType in data to send
+        mimeType: formData.mimeType
       };
 
       let result;

@@ -87,9 +87,8 @@ export default async function HomePage() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50">
       <Header />
-      
       {/* Enhanced Hero Section */}
-      <section className="relative overflow-hidden">
+      <section className="pt-24 relative overflow-hidden">
         {/* Background with parallax effect */}
         <div 
           className="absolute inset-0 bg-cover bg-center bg-fixed transform scale-105"

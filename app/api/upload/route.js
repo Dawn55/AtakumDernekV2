@@ -6,7 +6,7 @@ export async function POST(request) {
   try {
     const formData = await request.formData();
     const file = formData.get('file');
-    const type = formData.get('type') || 'announcements'; // announcements veya documents
+    const type = formData.get('type') || 'announcements';
 
     if (!file) {
       return NextResponse.json(
@@ -15,7 +15,7 @@ export async function POST(request) {
       );
     }
 
-    // Dosya tipini kontrol et
+    
     if (type === 'announcements' && !file.type.startsWith('image/')) {
       return NextResponse.json(
         { error: 'Sadece resim dosyaları kabul edilir' },
@@ -23,7 +23,7 @@ export async function POST(request) {
       );
     }
 
-    // Dosya boyutunu kontrol et
+    
     const maxSize = type === 'announcements' ? 5 * 1024 * 1024 : 10 * 1024 * 1024; // 5MB image, 10MB documents
     if (file.size > maxSize) {
       return NextResponse.json(
@@ -32,7 +32,7 @@ export async function POST(request) {
       );
     }
 
-    // Dosya adı ve yolu oluştur
+    
     const timestamp = Date.now();
     const randomString = Math.random().toString(36).substring(2, 15);
     const originalName = file.name || 'upload';
@@ -40,13 +40,10 @@ export async function POST(request) {
     const fileName = `${timestamp}-${randomString}${fileExtension}`;
     const filePath = `${type}/${fileName}`;
 
-    // Bucket adını belirle
     const bucket = type === 'announcements' ? 'announcements' : 'documents';
 
-    // Dosyayı Supabase Storage'a yükle
     const uploadResult = await uploadFile(bucket, file, filePath);
 
-    // Public URL'i al
     const publicUrl = getPublicUrl(bucket, filePath);
 
     return NextResponse.json({

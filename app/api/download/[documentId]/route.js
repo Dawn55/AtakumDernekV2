@@ -9,11 +9,11 @@ export async function GET(request, { params }) {
   try {
     const { documentId } = params;
     
-    // Document bilgilerini veritabanından al
+    
     const document = await prisma.document.findUnique({
       where: { 
         id: documentId,
-        published: true // Sadece yayınlanmış belgeler indirilebilir
+        published: true 
       }
     });
 
@@ -21,7 +21,7 @@ export async function GET(request, { params }) {
       return NextResponse.json({ error: "Belge bulunamadı" }, { status: 404 });
     }
 
-    // Dosyayı external URL'den fetch et
+    
     const fileResponse = await fetch(document.fileUrl);
     
     if (!fileResponse.ok) {
@@ -30,7 +30,7 @@ export async function GET(request, { params }) {
 
     const fileBuffer = await fileResponse.arrayBuffer();
     
-    // İndirme için uygun headers ayarla
+    
     const headers = {
       'Content-Type': document.mimeType || 'application/octet-stream',
       'Content-Disposition': `attachment; filename="${encodeURIComponent(document.fileName || document.title)}"`,

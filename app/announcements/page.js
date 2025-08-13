@@ -14,8 +14,9 @@ export default async function AnnouncementsPage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50/30 to-purple-50/30">
-      <Header />
-      <div className="relative bg-gradient-to-r from-blue-600 to-purple-600 py-16">
+      
+      <Header currentPage="/announcements" />
+      <div className="pt-32 relative bg-gradient-to-r from-blue-600 to-purple-600 py-16">
         <div className="absolute inset-0 bg-black/10"></div>
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center">

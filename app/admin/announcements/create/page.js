@@ -1,11 +1,15 @@
 import AnnouncementForm from "../../../../components/forms/AnnouncementForm.js";
 import Card from "../../../../components/ui/Card";
+import BackButton from "@/components/ui/BackButton.js";
 
 export default function CreateAnnouncementPage() {
   return (
     
     <div className="space-y-6">
-        <div className="text-center mb-8">
+        <div className="text-center mb-8 relative">
+            <div className="absolute left-0 top-0">
+              <BackButton href="/admin/documents"/>
+            </div>
           <div className="inline-flex items-center justify-center w-16 h-16 bg-blue-100 rounded-full mb-4">
             <svg 
               className="w-8 h-8 text-blue-600" 

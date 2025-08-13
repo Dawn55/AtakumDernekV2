@@ -1,11 +1,16 @@
 import DocumentForm from "../../../../components/forms/DocumentForm";
 import Card from "../../../../components/ui/Card";
+import BackButton from "@/components/ui/BackButton";
 
 export default function CreateDocumentPage() {
   return (
     <div className="min-h-screen max-h-screen overflow-y-auto">
       <div className="max-w-4xl mx-auto p-6 space-y-6">
         <div className="text-center mb-8">
+                  <div className="text-center mb-8 relative">
+                    <div className="absolute left-0 top-0">
+                      <BackButton href="/admin/documents" variant="green" />
+                    </div>
           <div className="inline-flex items-center justify-center w-16 h-16 bg-green-100 rounded-full mb-4">
             <svg 
               className="w-8 h-8 text-green-600" 
@@ -35,6 +40,7 @@ export default function CreateDocumentPage() {
         <DocumentForm />
       </Card>
         </div>
+      </div>
       </div>
     </div>
   );
